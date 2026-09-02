@@ -2,41 +2,42 @@
 
 ### Confidential No-Loss Prize Savings Pool powered by Zama FHEVM
 
-SecretPool is a confidential prize savings application inspired by the PoolTogether no-loss lottery concept.
+SecretPool is a confidential prize savings application inspired by the no-loss lottery concept.
 
-Users deposit confidential test tokens into a shared pool. Instead of exposing users' balances and lottery weights publicly, SecretPool uses Fully Homomorphic Encryption (FHE) through the Zama FHEVM protocol to keep sensitive values encrypted while the smart contract performs the required computations.
+Users deposit confidential test tokens into a shared pool. Instead of exposing users' balances and lottery weights as plaintext values, SecretPool uses Fully Homomorphic Encryption (FHE) through the Zama FHEVM protocol to keep sensitive values encrypted while the smart contract performs the required computations.
 
 ## 🎯 Project Goal
 
-Traditional on-chain lotteries can expose:
+Traditional on-chain prize and lottery applications can expose sensitive information such as:
 
 - User balances
 - Deposit amounts
 - Lottery weights
-- Prize information
-- Winner-related information
+- Prize amounts
+- Portfolio or savings information
 
 SecretPool demonstrates how FHE can be used to build a more private prize savings experience.
 
-The core idea is simple:
+The core idea is:
 
-> Deposit → Keep values encrypted → Run a confidential weighted draw → Claim the prize → Decrypt your balance
+> **Deposit → Keep values encrypted → Run a confidential weighted draw → Claim the prize → Decrypt your balance**
 
 ---
 
 ## ✨ Features
 
 - 🔐 Encrypted user balances
-- 🎟️ Confidential lottery weights
+- 🎟️ Encrypted lottery weights
 - 🎲 FHE-based confidential random draw
-- 🏆 Confidential winner selection
+- 🏆 Confidential prize assignment
 - 💰 No-loss prize savings model
 - 🔒 Encrypted prize pool
-- 🧮 FHE operations performed on encrypted values
+- 🧮 Computation over encrypted values using Zama FHEVM
 - 🦊 MetaMask wallet integration
 - 🌐 Next.js + React frontend
 - ⛓️ Ethereum Sepolia deployment
 - 🔓 User-controlled balance decryption
+- 🔐 Zama Relayer SDK integration for encrypted input and user decryption
 
 ---
 
@@ -46,41 +47,369 @@ The core idea is simple:
 
 A user deposits confidential test tokens into SecretPool.
 
-The user's balance is stored as an encrypted FHE value rather than as a normal plaintext balance.
+The deposited amount is represented and maintained as an encrypted FHE value in the pool rather than as a normal plaintext balance.
 
-### 2. Encrypted Weight
+### 2. Encrypted Lottery Weight
 
-The user's deposited amount contributes to their encrypted lottery weight.
+A user's deposited amount contributes to their encrypted lottery weight.
 
 A larger deposit gives the user a proportionally larger chance of winning.
+
+The total lottery weight is also maintained as an encrypted value.
 
 ### 3. Yield
 
 Yield is added to the confidential prize pool.
 
-The yield becomes the prize available for the draw.
+The yield becomes the prize available for the next draw.
+
+For the demonstration deployment, test yield was added to the pool using the test token and the pool's `addYield()` function.
 
 ### 4. Confidential Draw
 
-The contract generates FHE-based randomness and performs the weighted winner selection while keeping the relevant values encrypted.
+The pool generates FHE-based randomness and performs weighted winner selection using encrypted values.
 
-The draw does not require exposing users' balances or weights as plaintext values.
+The draw compares the encrypted random ticket against encrypted cumulative participant weights.
 
-### 5. Claim
+The relevant balances and weights do not need to be revealed as plaintext values to perform the draw.
 
-The selected winner can claim the prize.
+### 5. Prize Assignment
 
-The prize is added to the winner's encrypted balance.
+The selected participant receives an encrypted prize value associated with the current draw.
 
-### 6. Decrypt
+The prize amount remains encrypted.
+
+### 6. Claim
+
+The selected participant can claim the prize.
+
+The prize is added to the participant's encrypted balance and encrypted lottery weight.
+
+The draw prize is then cleared to prevent the same prize from being claimed again.
+
+### 7. Decrypt
 
 The user can request decryption of their own encrypted balance through the Zama relayer infrastructure.
 
-For example:
+Only the user's authorized decryption flow reveals their balance in the frontend.
+
+---
+
+## 🔐 FHE Privacy Model
+
+SecretPool uses Zama FHEVM to perform computations on encrypted values.
+
+Conceptually:
 
 ```text
-100 deposited
-      ↓
-500 prize
-      ↓
-600 final balance
+Plaintext deposit
+       ↓
+FHE encryption
+       ↓
+Encrypted balance
+       ↓
+Encrypted lottery weight
+       ↓
+FHE-based weighted draw
+       ↓
+Encrypted prize
+       ↓
+Encrypted user balance
+       ↓
+User-authorized decryption
+```
+
+The important idea is that sensitive financial values can remain encrypted while the smart contract performs the required computations.
+
+SecretPool is a demonstration of confidential computation on Ethereum rather than a production financial product.
+
+---
+
+## 🎲 Confidential Weighted Draw
+
+The draw uses FHE randomness and encrypted participant weights.
+
+At a high level:
+
+```text
+Encrypted total weight
+        +
+FHE random value
+        ↓
+Encrypted random ticket
+        ↓
+Compare against encrypted cumulative weights
+        ↓
+Select winning participant
+        ↓
+Assign encrypted prize
+```
+
+The implementation uses encrypted comparisons and selection operations to determine which participant receives the prize.
+
+This avoids requiring participant balances or lottery weights to be exposed as plaintext during the winner-selection process.
+
+---
+
+## 💰 No-Loss Prize Savings Model
+
+SecretPool follows a no-loss prize savings concept:
+
+- Users deposit their principal into the pool.
+- The deposited principal contributes to their lottery weight.
+- Yield is added separately to the prize pool.
+- The draw distributes the available prize to a selected participant.
+- A participant can withdraw their available principal through the encrypted withdrawal flow.
+
+The goal is to demonstrate how confidential computation can be applied to a prize-linked savings experience.
+
+---
+
+## 🧪 Demonstrated End-to-End Flow
+
+A successful demonstration was completed on the deployed Sepolia contracts:
+
+```text
+100 principal deposited
+        ↓
+500 test yield added to prize pool
+        ↓
+Confidential weighted draw
+        ↓
+Prize claimed
+        ↓
+600 total encrypted balance
+        ↓
+User decrypts balance
+```
+
+The frontend successfully displayed:
+
+```text
+600 (Decrypted)
+```
+
+after the prize was claimed.
+
+---
+
+## 🌐 Live Demo
+
+**SecretPool:**  
+https://secreted-pool.netlify.app/
+
+The live application supports:
+
+- Connect wallet
+- Decrypt balance
+- Encrypt and deposit
+- Encrypt and withdraw
+- Trigger confidential draw
+- Claim prize
+- Decrypt the resulting balance
+
+---
+
+## ⛓️ Deployed Contracts
+
+### Ethereum Sepolia
+
+#### Confidential Test Token
+
+```text
+0xE560dBc970bB0347ABD1582A20a0f65C35795171
+```
+
+#### Confidential Prize Pool
+
+```text
+0x869ed12fA618dAeD3340dB5C3738D1F3A3d0Ab9b
+```
+
+The pool contract maintains encrypted participant balances, encrypted total weight, encrypted prize-pool state, and encrypted draw prizes.
+
+---
+
+## 🛠️ Technology Stack
+
+### Smart Contracts
+
+- Solidity `^0.8.24`
+- Zama FHEVM
+- `@fhevm/solidity`
+- OpenZeppelin
+- Hardhat
+- Ethereum Sepolia
+
+### Frontend
+
+- Next.js
+- React
+- TypeScript
+- ethers.js
+- `@zama-fhe/relayer-sdk`
+- MetaMask
+
+### Confidential Computing
+
+- Zama FHEVM
+- FHE encrypted integers
+- FHE arithmetic
+- FHE comparisons
+- FHE conditional selection
+- FHE randomness
+- User-authorized decryption
+
+---
+
+## 📁 Project Structure
+
+```text
+SecretPool/
+├── contracts/
+│   ├── ConfidentialPrizePool.sol
+│   ├── ConfidentialTestToken.sol
+│   ├── MockYieldSource.sol
+│   └── FHECounter.sol
+│
+├── deploy/
+│   └── Deployment scripts
+│
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   ├── package.json
+│   └── next.config.ts
+│
+├── scripts/
+├── tasks/
+├── test/
+│
+├── .env.example
+├── hardhat.config.ts
+├── package.json
+└── README.md
+```
+
+---
+
+## 🚀 Run Locally
+
+### Prerequisites
+
+- Node.js 20+
+- npm
+- MetaMask
+- Sepolia ETH for transaction fees
+- Sepolia test environment configured for Zama FHEVM
+
+### Install smart-contract dependencies
+
+From the repository root:
+
+```bash
+npm install
+```
+
+### Compile contracts
+
+```bash
+npm run compile
+```
+
+### Run contract tests
+
+```bash
+npm test
+```
+
+### Start the frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Then open the local development URL shown by Next.js.
+
+---
+
+## 🔐 Environment Variables
+
+Never commit private keys or other secrets to GitHub.
+
+Use the provided:
+
+```text
+.env.example
+```
+
+as a reference for local configuration.
+
+Do not expose:
+
+- Wallet private keys
+- Seed phrases
+- Deployment credentials
+- API secrets
+
+The public frontend does not require the deployer's private key.
+
+---
+
+## 🔎 Security Notes
+
+SecretPool is a **testnet demonstration project**.
+
+The deployed token is a confidential test token and has no real-world monetary value.
+
+The application is intended to demonstrate:
+
+- Confidential balances
+- Encrypted lottery weights
+- FHE-based computation
+- Confidential weighted draws
+- User-authorized decryption
+
+It has not been audited for production financial use.
+
+---
+
+## 📚 Zama FHEVM
+
+SecretPool is built using the Zama FHEVM ecosystem.
+
+Learn more:
+
+- Zama FHEVM documentation: https://docs.zama.org/
+- Zama developer resources: https://www.zama.org/
+
+---
+
+## 📜 License
+
+This project is licensed under the **BSD-3-Clause-Clear License**.
+
+See [`LICENSE`](./LICENSE) for the complete license text.
+
+---
+
+## 👤 Author
+
+**Subrahmanyam Padala**
+
+GitHub:  
+https://github.com/subrahmanyam-padala
+
+---
+
+## 🙏 Acknowledgements
+
+Built with the Zama FHEVM ecosystem and inspired by the no-loss prize savings concept pioneered by PoolTogether.
+
+---
+
+## 🔐 SecretPool in One Sentence
+
+> **SecretPool demonstrates how Fully Homomorphic Encryption can enable a no-loss prize savings experience where balances and lottery weights remain encrypted while the smart contract performs the confidential draw.**
