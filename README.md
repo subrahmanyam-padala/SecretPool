@@ -1,123 +1,86 @@
-# FHEVM Hardhat Template
+# 🔐 SecretPool
 
-A Hardhat-based template for developing Fully Homomorphic Encryption (FHE) enabled Solidity smart contracts using the
-FHEVM protocol by Zama.
+### Confidential No-Loss Prize Savings Pool powered by Zama FHEVM
 
-## Quick Start
+SecretPool is a confidential prize savings application inspired by the PoolTogether no-loss lottery concept.
 
-For detailed instructions see:
-[FHEVM Hardhat Quick Start Tutorial](https://docs.zama.ai/protocol/solidity-guides/getting-started/quick-start-tutorial)
+Users deposit confidential test tokens into a shared pool. Instead of exposing users' balances and lottery weights publicly, SecretPool uses Fully Homomorphic Encryption (FHE) through the Zama FHEVM protocol to keep sensitive values encrypted while the smart contract performs the required computations.
 
-### Prerequisites
+## 🎯 Project Goal
 
-- **Node.js**: Version 20 or higher
-- **npm or yarn/pnpm**: Package manager
+Traditional on-chain lotteries can expose:
 
-## 🚀 Deployed Contracts (Sepolia)
-- **Token Address**: `0xE560dBc970bB0347ABD1582A20a0f65C35795171`
-- **Pool V2 Address**: `0x869ed12fA618dAeD3340dB5C3738D1F3A3d0Ab9b`
+- User balances
+- Deposit amounts
+- Lottery weights
+- Prize information
+- Winner-related information
 
-## 🖥️ Running the Frontend
+SecretPool demonstrates how FHE can be used to build a more private prize savings experience.
 
-To start the frontend application locally:
-```bash
-cd frontend
-npm install
-npm run dev
-```
+The core idea is simple:
 
-### Installation
-
-1. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-2. **Set up environment variables**
-
-   ```bash
-   npx hardhat vars set MNEMONIC
-
-   # Set your Infura API key for network access
-   npx hardhat vars set INFURA_API_KEY
-
-   # Optional: Set Etherscan API key for contract verification
-   npx hardhat vars set ETHERSCAN_API_KEY
-   ```
-
-3. **Compile and test**
-
-   ```bash
-   npm run compile
-   npm run test
-   ```
-
-4. **Deploy to local network**
-
-   ```bash
-   # Start a local FHEVM-ready node
-   npx hardhat node
-   # Deploy to local network
-   npx hardhat deploy --network localhost
-   ```
-
-5. **Deploy to Sepolia Testnet**
-
-   ```bash
-   # Deploy to Sepolia
-   npx hardhat deploy --network sepolia
-   # Verify contract on Etherscan
-   npx hardhat verify --network sepolia <CONTRACT_ADDRESS>
-   ```
-
-6. **Test on Sepolia Testnet**
-
-   ```bash
-   # Once deployed, you can run a simple test on Sepolia.
-   npx hardhat test --network sepolia
-   ```
-
-## 📁 Project Structure
-
-```
-fhevm-hardhat-template/
-├── contracts/           # Smart contract source files
-│   └── FHECounter.sol   # Example FHE counter contract
-├── deploy/              # Deployment scripts
-├── tasks/               # Hardhat custom tasks
-├── test/                # Test files
-├── hardhat.config.ts    # Hardhat configuration
-└── package.json         # Dependencies and scripts
-```
-
-## 📜 Available Scripts
-
-| Script             | Description              |
-| ------------------ | ------------------------ |
-| `npm run compile`  | Compile all contracts    |
-| `npm run test`     | Run all tests            |
-| `npm run coverage` | Generate coverage report |
-| `npm run lint`     | Run linting checks       |
-| `npm run clean`    | Clean build artifacts    |
-
-## 📚 Documentation
-
-- [FHEVM Documentation](https://docs.zama.ai/fhevm)
-- [FHEVM Hardhat Setup Guide](https://docs.zama.ai/protocol/solidity-guides/getting-started/setup)
-- [FHEVM Testing Guide](https://docs.zama.ai/protocol/solidity-guides/development-guide/hardhat/write_test)
-- [FHEVM Hardhat Plugin](https://docs.zama.ai/protocol/solidity-guides/development-guide/hardhat)
-
-## 📄 License
-
-This project is licensed under the BSD-3-Clause-Clear License. See the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/zama-ai/fhevm/issues)
-- **Documentation**: [FHEVM Docs](https://docs.zama.ai)
-- **Community**: [Zama Discord](https://discord.gg/zama)
+> Deposit → Keep values encrypted → Run a confidential weighted draw → Claim the prize → Decrypt your balance
 
 ---
 
-**Built with ❤️ by the Zama team**
+## ✨ Features
+
+- 🔐 Encrypted user balances
+- 🎟️ Confidential lottery weights
+- 🎲 FHE-based confidential random draw
+- 🏆 Confidential winner selection
+- 💰 No-loss prize savings model
+- 🔒 Encrypted prize pool
+- 🧮 FHE operations performed on encrypted values
+- 🦊 MetaMask wallet integration
+- 🌐 React frontend
+- ⛓️ Ethereum Sepolia deployment
+- 🔓 User-controlled balance decryption
+
+---
+
+## 🏗️ How SecretPool Works
+
+### 1. Deposit
+
+A user deposits confidential test tokens into SecretPool.
+
+The user's balance is stored as an encrypted FHE value rather than as a normal plaintext balance.
+
+### 2. Encrypted Weight
+
+The user's deposited amount contributes to their encrypted lottery weight.
+
+A larger deposit gives the user a proportionally larger chance of winning.
+
+### 3. Yield
+
+Yield is added to the confidential prize pool.
+
+The yield becomes the prize available for the draw.
+
+### 4. Confidential Draw
+
+The contract generates FHE-based randomness and performs the weighted winner selection while keeping the relevant values encrypted.
+
+The draw does not require exposing users' balances or weights as plaintext values.
+
+### 5. Claim
+
+The selected winner can claim the prize.
+
+The prize is added to the winner's encrypted balance.
+
+### 6. Decrypt
+
+The user can request decryption of their own encrypted balance through the Zama relayer infrastructure.
+
+For example:
+
+```text
+100 deposited
+      ↓
+500 prize
+      ↓
+600 final balance
