@@ -13,6 +13,19 @@ For detailed instructions see:
 - **Node.js**: Version 20 or higher
 - **npm or yarn/pnpm**: Package manager
 
+## 🚀 Deployed Contracts (Sepolia)
+- **Token Address**: `0xE560dBc970bB0347ABD1582A20a0f65C35795171`
+- **Pool V2 Address**: `0x869ed12fA618dAeD3340dB5C3738D1F3A3d0Ab9b`
+
+## 🖥️ Running the Frontend
+
+To start the frontend application locally:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
 ### Installation
 
 1. **Install dependencies**
