@@ -34,7 +34,7 @@ The core idea is simple:
 - 🔒 Encrypted prize pool
 - 🧮 FHE operations performed on encrypted values
 - 🦊 MetaMask wallet integration
-- 🌐 React frontend
+- 🌐 Next.js + React frontend
 - ⛓️ Ethereum Sepolia deployment
 - 🔓 User-controlled balance decryption
 
