@@ -195,7 +195,7 @@ after the prize was claimed.
 
 ## 🌐 Live Demo
 
-**SecretPool:**  
+**SecretPool:**
 https://secreted-pool.netlify.app/
 
 The live application supports:
@@ -269,8 +269,7 @@ SecretPool/
 ├── contracts/
 │   ├── ConfidentialPrizePool.sol
 │   ├── ConfidentialTestToken.sol
-│   ├── MockYieldSource.sol
-│   └── FHECounter.sol
+│   └── MockYieldSource.sol
 │
 ├── deploy/
 │   └── Deployment scripts
@@ -374,6 +373,19 @@ The application is intended to demonstrate:
 
 It has not been audited for production financial use.
 
+### Known Limitations (For Educational Purposes)
+
+1. **Unbounded Loop in `triggerDraw`**: The `triggerDraw` function iterates over all depositors to select a winner using FHE. While this works well for demonstration purposes, it introduces an unbounded loop. In a production scenario, this would lead to Out of Gas errors if the pool grows too large. Fixing this requires a redeployment with a redesigned drawing mechanism (e.g., paginated draws or an off-chain VRF + mapping).
+2. **Draw Cooldown**: Currently, `triggerDraw` can be called anytime by anyone. A production setup would enforce a specific draw interval (e.g., weekly) which requires a redeployment to enforce on-chain.
+3. **Zero-Weight Draw**: If all users withdraw their funds, the total weight becomes zero. Calling `triggerDraw` when the total weight is zero will cause the prize pool to be reset, effectively losing the prize since no one can win. This requires an FHE conditional reset of the prize pool and redeployment.
+
+---
+
+## 🎟️ Test Token Access
+
+The `ConfidentialTestToken` requires a designated owner to mint new tokens. To test the dApp on Sepolia, judges can use the existing balances or request test tokens from the contract deployer.
+The token's `mint()` function is protected by the `onlyOwner` modifier to maintain access control integrity. If you have the deployer private key, you can mint test tokens by running the included minting script.
+
 ---
 
 ## 📚 Zama FHEVM
@@ -399,7 +411,7 @@ See [`LICENSE`](./LICENSE) for the complete license text.
 
 **Subrahmanyam Padala**
 
-GitHub:  
+GitHub:
 https://github.com/subrahmanyam-padala
 
 ---

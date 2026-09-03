@@ -29,7 +29,7 @@ export default function Home() {
   const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
   const [poolContract, setPoolContract] = useState<ethers.Contract | null>(null);
   const [tokenContract, setTokenContract] = useState<ethers.Contract | null>(null);
-  
+
   const [balance, setBalance] = useState<string>("Encrypted (***)");
   const [depositAmount, setDepositAmount] = useState<string>("");
   const [withdrawAmount, setWithdrawAmount] = useState<string>("");
@@ -46,13 +46,13 @@ export default function Home() {
         const s = await p.getSigner();
         setSigner(s);
         setAccount(s.address);
-        
+
         // Initialize real contracts
         setPoolContract(new ethers.Contract(POOL_ADDRESS, POOL_ABI, s));
         setTokenContract(new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, s));
-        
+
         setStatus("Connected to Web3");
-        
+
         // Fetch real draw ID
         const cPool = new ethers.Contract(POOL_ADDRESS, POOL_ABI, s);
         try {
@@ -61,7 +61,7 @@ export default function Home() {
         } catch (e) {
           console.warn("Could not fetch draw ID. Is the contract deployed locally?", e);
         }
-        
+
       } catch (e: unknown) {
         setStatus("Error: " + (e as Error).message);
       }
@@ -78,19 +78,19 @@ export default function Home() {
       const { createInstance, SepoliaConfigV2, initSDK } = await import("@zama-fhe/relayer-sdk/web");
       await initSDK();
       // Zama FHEVM Sepolia Configuration
-      const instance = await createInstance({ 
+      const instance = await createInstance({
         ...SepoliaConfigV2,
         network: (window as any).ethereum
-      }); 
-      
+      });
+
       const input = instance.createEncryptedInput(TOKEN_ADDRESS, account);
       input.add64(Number(depositAmount));
       const encryptedData = await input.encrypt();
-      
+
       setStatus("Sending Encrypted Deposit Transaction...");
       const tx2 = await tokenContract.transferAndCall(POOL_ADDRESS, encryptedData.handles[0], encryptedData.inputProof);
       await tx2.wait();
-      
+
       setStatus("Deposit transaction sent successfully!");
       setDepositAmount("");
     } catch (e: unknown) {
@@ -190,19 +190,19 @@ export default function Home() {
     try {
       const { createInstance, SepoliaConfigV2, initSDK } = await import("@zama-fhe/relayer-sdk/web");
       await initSDK();
-      const instance = await createInstance({ 
+      const instance = await createInstance({
         ...SepoliaConfigV2,
         network: (window as any).ethereum
       });
-      
+
       const input = instance.createEncryptedInput(POOL_ADDRESS, account);
       input.add64(Number(withdrawAmount));
       const encryptedData = await input.encrypt();
-      
+
       setStatus("Sending Encrypted Withdrawal Transaction...");
       const tx = await poolContract.withdraw(encryptedData.handles[0], encryptedData.inputProof);
       await tx.wait();
-      
+
       setStatus("Withdrawal successful!");
       setWithdrawAmount("");
       // Clear balance cache
@@ -213,20 +213,60 @@ export default function Home() {
   };
 
   const triggerDraw = async () => {
-    if (!poolContract) return;
+    if (!poolContract || !account) return;
     setStatus("Triggering confidential draw transaction...");
     try {
       const tx = await poolContract.triggerDraw();
       await tx.wait();
-      setDrawId(d => d + 1);
-      
-      setStatus("Draw complete. Checking eligibility...");
-      await poolContract.drawPrizes(drawId + 1, account);
-      // winStatus is encrypted, we'd need to decrypt it via reencrypt in a full prod app.
-      // For this step, we just rely on the contract execution.
-      setIsWinner(true); // Placeholder for UI state
+
+      const newDrawId = await poolContract.currentDrawId();
+      setDrawId(Number(newDrawId));
+
+      setStatus("Draw complete. Awaiting signature to decrypt prize...");
+
+      const { createInstance, SepoliaConfigV2, initSDK } = await import("@zama-fhe/relayer-sdk/web");
+      await initSDK();
+      const instance = await createInstance({
+        ...SepoliaConfigV2,
+        network: (window as any).ethereum
+      });
+
+      const { publicKey, privateKey } = instance.generateKeypair();
+      const startTimestamp = Math.floor(Date.now() / 1000);
+      const durationDays = 1;
+
+      const eip712 = instance.createEIP712(publicKey, [POOL_ADDRESS], startTimestamp, durationDays);
+      if (!signer) return;
+
+      const { EIP712Domain, ...eip712Types } = eip712.types as any;
+      const signature = await signer.signTypedData(eip712.domain, eip712Types, eip712.message);
+
+      setStatus("Fetching Encrypted Prize Handle...");
+      const encryptedPrizeHandle = await poolContract.drawPrizes(newDrawId, account);
+
+      setStatus("Decrypting prize...");
+      const decrypted = await instance.userDecrypt(
+        [{ handle: encryptedPrizeHandle, contractAddress: POOL_ADDRESS }],
+        privateKey,
+        publicKey,
+        signature.replace("0x", ""),
+        [POOL_ADDRESS],
+        account,
+        startTimestamp,
+        durationDays
+      );
+
+      const decryptedValue = (decrypted as any)?.[encryptedPrizeHandle] ?? Object.values(decrypted as any)[0];
+
+      if (Number(decryptedValue) > 0) {
+        setIsWinner(true);
+      } else {
+        setIsWinner(false);
+      }
       setHasClaimed(false);
-      
+
+      setStatus("Eligibility check complete.");
+
     } catch (e: unknown) {
       setStatus("Draw failed: " + ((e as Error).message || String(e)));
     }
@@ -270,9 +310,9 @@ export default function Home() {
 
           <div style={{ marginTop: '2rem' }}>
             <h4>Deposit to Pool</h4>
-            <input 
-              className="input" 
-              placeholder="Amount to deposit" 
+            <input
+              className="input"
+              placeholder="Amount to deposit"
               type="number"
               value={depositAmount}
               onChange={e => setDepositAmount(e.target.value)}
@@ -280,11 +320,11 @@ export default function Home() {
             <button className="btn" style={{ width: '100%', marginBottom: '1rem' }} onClick={handleDeposit}>
               Encrypt & Deposit
             </button>
-            
+
             <h4>Withdraw Principal</h4>
-            <input 
-              className="input" 
-              placeholder="Amount to withdraw" 
+            <input
+              className="input"
+              placeholder="Amount to withdraw"
               type="number"
               value={withdrawAmount}
               onChange={e => setWithdrawAmount(e.target.value)}

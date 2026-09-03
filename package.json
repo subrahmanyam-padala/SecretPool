@@ -1,5 +1,5 @@
 {
-  "name": "fhevm-hardhat-template",
+  "name": "secretpool",
   "description": "Hardhat-based template for developing FHEVM Solidity smart contracts",
   "version": "0.4.1",
   "engines": {
@@ -7,10 +7,10 @@
     "npm": ">=7.0.0"
   },
   "license": "BSD-3-Clause-Clear",
-  "homepage": "https://github.com/zama-ai/fhevm-hardhat-template/README.md",
+  "homepage": "https://github.com/subrahmanyam-padala/SecretPool",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zama-ai/fhevm-hardhat-template.git"
+    "url": "https://github.com/subrahmanyam-padala/SecretPool"
   },
   "keywords": [
     "fhevm",

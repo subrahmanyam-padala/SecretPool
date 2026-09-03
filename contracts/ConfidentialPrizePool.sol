@@ -54,7 +54,7 @@ contract ConfidentialPrizePool is ZamaEthereumConfig, Ownable, ReentrancyGuard, 
         return false;
     }
 
-    function addYield(uint64 yieldAmount) external {
+    function addYield(uint64 yieldAmount) external onlyOwner {
         euint64 encryptedYield = FHE.asEuint64(yieldAmount);
         currentPrizePool = FHE.add(currentPrizePool, encryptedYield);
         FHE.allowThis(currentPrizePool);

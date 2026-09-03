@@ -41,6 +41,7 @@ describe("ConfidentialPrizePool Security and Core Logic", function () {
     // Transfer ownership of token to MockYieldSource so it can mint yield
     const yieldSourceAddress = await yieldSource.getAddress();
     await (await token.transferOwnership(yieldSourceAddress)).wait();
+    await (await pool.transferOwnership(yieldSourceAddress)).wait();
   });
 
   async function encryptAndTransferAndCall(signer: HardhatEthersSigner, amount: bigint, to: string) {
@@ -156,5 +157,15 @@ describe("ConfidentialPrizePool Security and Core Logic", function () {
       caught = true;
     }
     expect(caught).to.be.true;
+  });
+
+  it("Non-owners cannot call generateYield or addYield directly", async function () {
+    await expect(
+      yieldSource.connect(signers.bob).generateYield(poolAddress, 100n)
+    ).to.be.reverted;
+
+    await expect(
+      pool.connect(signers.bob).addYield(100n)
+    ).to.be.reverted;
   });
 });

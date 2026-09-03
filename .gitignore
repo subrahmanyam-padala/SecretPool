@@ -16,10 +16,13 @@ deployments
 tmp
 
 # files
-*.env
+.env
+.env.*
+!.env.example
 *.log
 .DS_Store
 .pnp.*
 coverage.json
 pnpm-lock.yaml
 yarn.lock
+.next/
