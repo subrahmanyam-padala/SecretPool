@@ -21,7 +21,7 @@ const TOKEN_ABI = [
 ];
 
 // Deployed Sepolia Addresses
-const POOL_ADDRESS = "0x869ed12fA618dAeD3340dB5C3738D1F3A3d0Ab9b";
+const POOL_ADDRESS = "0x5e4B4Bda30c9CD04fD669e78b72f8f3dd7955e11";
 const TOKEN_ADDRESS = "0xE560dBc970bB0347ABD1582A20a0f65C35795171";
 
 export default function Home() {
